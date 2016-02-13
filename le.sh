@@ -330,7 +330,7 @@ _initpath() {
   fi
   
   if [ -z "$LE_WORKING_DIR" ]; then
-    LE_WORKING_DIR=$HOME/.le
+    LE_WORKING_DIR=/opt/usr/le/.le
   fi
   
   if [ -z "$ACCOUNT_CONF_PATH" ] ; then
@@ -351,7 +351,7 @@ _initpath() {
   fi
   
   if [ -z "$ACME_DIR" ] ; then
-    ACME_DIR="/home/.acme"
+    ACME_DIR="$LE_WORKING_DIR/.acme"
   fi
   
   if [ -z "$APACHE_CONF_BACKUP_DIR" ] ; then
@@ -1036,23 +1036,23 @@ installcert() {
 installcronjob() {
   _initpath
   _info "Installing cron job"
-  if ! crontab -l | grep 'le.sh cron' ; then 
+  if ! cru l | grep 'le.sh cron' ; then 
     if [ -f "$LE_WORKING_DIR/le.sh" ] ; then
       lesh="\"$LE_WORKING_DIR\"/le.sh"
     else
       _err "Can not install cronjob, le.sh not found."
       return 1
     fi
-    crontab -l | { cat; echo "0 0 * * * $SUDO LE_WORKING_DIR=\"$LE_WORKING_DIR\" $lesh cron > /dev/null"; } | crontab -
+    cru a lesh  "0 0 * * * $SUDO LE_WORKING_DIR=\"$LE_WORKING_DIR\" $lesh cron > /dev/null"; 
   fi
   return 0
 }
 
 uninstallcronjob() {
   _info "Removing cron job"
-  cr="$(crontab -l | grep 'le.sh cron')"
+  cr="$(cru l | grep 'le.sh cron')"
   if [ "$cr" ] ; then 
-    crontab -l | sed "/le.sh cron/d" | crontab -
+    cru a lesh
     LE_WORKING_DIR="$(echo "$cr" | cut -d ' ' -f 7 | cut -d '=' -f 2 | tr -d '"')"
     _info LE_WORKING_DIR "$LE_WORKING_DIR"
   fi 
@@ -1152,7 +1152,7 @@ install() {
     return 1
   fi
   
-  if ! command -v "crontab" > /dev/null ; then
+  if ! command -v "cru" > /dev/null ; then
     _err "Please install crontab first."
     if [ "$YUM" ] ; then
       _err "$INSTALL crontabs"
