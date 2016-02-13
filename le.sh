@@ -200,7 +200,7 @@ _send_signed_request() {
   
   CURL_HEADER="$LE_WORKING_DIR/curl.header"
   dp="$LE_WORKING_DIR/curl.dump"
-  CURL="curl --silent --dump-header $CURL_HEADER "
+  CURL="curl -k --silent --dump-header $CURL_HEADER "
   if [ "$DEBUG" ] ; then
     CURL="$CURL --trace-ascii $dp "
   fi
@@ -656,7 +656,7 @@ issue() {
         return 1
       fi
 
-      entry=$(echo $response | egrep -o  '{[^{]*"type":"'$vtype'"[^}]*')
+      entry=$(echo $response | grep -Eo  '{[^{]*"type":"'$vtype'"[^}]*')
       _debug entry "$entry"
 
       token=$(echo "$entry" | sed 's/,/\n'/g| grep '"token":'| cut -d : -f 2|sed 's/"//g')
