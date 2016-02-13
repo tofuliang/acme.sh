@@ -1052,7 +1052,7 @@ uninstallcronjob() {
   _info "Removing cron job"
   cr="$(cru l | grep 'le.sh cron')"
   if [ "$cr" ] ; then 
-    cru a lesh
+    cru d lesh
     LE_WORKING_DIR="$(echo "$cr" | cut -d ' ' -f 7 | cut -d '=' -f 2 | tr -d '"')"
     _info LE_WORKING_DIR "$LE_WORKING_DIR"
   fi 
