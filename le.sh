@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/opt/bin/bash
 VER=1.1.6
 PROJECT="https://github.com/Neilpang/le"
 

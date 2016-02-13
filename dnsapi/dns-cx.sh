@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/opt/bin/bash
 
 # Cloudxns.com Domain api
 #
