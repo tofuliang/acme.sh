@@ -242,7 +242,7 @@ _send_signed_request() {
 _get() {
   url="$1"
   _debug url $url
-  response="$(curl --silent $url)"
+  response="$(curl -k --silent $url)"
   ret=$?
   _debug response  "$response"
   code="$(echo $response | grep -o '"status":[0-9]\+' | cut -d : -f 2)"
@@ -819,7 +819,7 @@ issue() {
         return 1
       fi
       
-      status=$(echo $response | egrep -o  '"status":"[^"]+"' | cut -d : -f 2 | sed 's/"//g')
+      status=$(echo $response | grep -Eo  '"status":"[^"]+"' | cut -d : -f 2 | sed 's/"//g')
       if [ "$status" == "valid" ] ; then
         _info "Success"
         _stopserver $serverproc
@@ -829,7 +829,7 @@ issue() {
       fi
       
       if [ "$status" == "invalid" ] ; then
-         error=$(echo $response | egrep -o '"error":{[^}]*}' | grep -o '"detail":"[^"]*"' | cut -d '"' -f 4)
+         error=$(echo $response | grep -Eo '"error":{[^}]*}' | grep -o '"detail":"[^"]*"' | cut -d '"' -f 4)
         _err "$d:Verify error:$error"
         _clearupwebbroot "$Le_Webroot" "$removelevel" "$token"
         _clearup
@@ -860,7 +860,7 @@ issue() {
 
   if [ "$Le_LinkCert" ] ; then
     echo -----BEGIN CERTIFICATE----- > "$CERT_PATH"
-    curl --silent "$Le_LinkCert" | openssl base64 -e  >> "$CERT_PATH"
+    curl -k --silent "$Le_LinkCert" | openssl base64 -e  >> "$CERT_PATH"
     echo -----END CERTIFICATE-----  >> "$CERT_PATH"
     _info "Cert success."
     cat "$CERT_PATH"
@@ -882,7 +882,7 @@ issue() {
   
   if [ "$Le_LinkIssuer" ] ; then
     echo -----BEGIN CERTIFICATE----- > "$CA_CERT_PATH"
-    curl --silent "$Le_LinkIssuer" | openssl base64 -e  >> "$CA_CERT_PATH"
+    curl -k --silent "$Le_LinkIssuer" | openssl base64 -e  >> "$CA_CERT_PATH"
     echo -----END CERTIFICATE-----  >> "$CA_CERT_PATH"
     _info "The intermediate CA cert is in $CA_CERT_PATH"
   fi

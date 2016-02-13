@@ -183,9 +183,9 @@ _rest() {
   if [ "$3" ] ; then
     data="$3"
     _debug data "$data"
-    response="$(curl --silent -X $m "$url"  -d $data)"
+    response="$(curl -k --silent -X $m "$url"  -d $data)"
   else
-    response="$(curl --silent -X $m "$url" )"
+    response="$(curl -k --silent -X $m "$url" )"
   fi
   
   if [ "$?" != "0" ] ; then
