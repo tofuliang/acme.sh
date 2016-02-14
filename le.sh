@@ -899,10 +899,10 @@ issue() {
   
   _setopt "$DOMAIN_CONF"  "Le_RenewalDays"      "="  "$Le_RenewalDays"
   
-  Le_NextRenewTime=$(date -u -d "+$Le_RenewalDays day" "+%s")
+  Le_NextRenewTime=$(expr $(date -u "+%s") + $(expr 86400 \* $Le_RenewalDays))
   _setopt "$DOMAIN_CONF"  "Le_NextRenewTime"      "="  "$Le_NextRenewTime"
   
-  Le_NextRenewTimeStr=$(date -u -d "+$Le_RenewalDays day" "+%Y-%m-%d %H:%M:%S UTC")
+  Le_NextRenewTimeStr=$(date -u -d @$Le_NextRenewTime "+%Y-%m-%d %H:%M:%S UTC")
   _setopt "$DOMAIN_CONF"  "Le_NextRenewTimeStr"      "="  "\"$Le_NextRenewTimeStr\""
 
 
