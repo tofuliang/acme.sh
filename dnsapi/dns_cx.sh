@@ -14,7 +14,7 @@ CX_Api="https://www.cloudxns.net/api2"
 ########  Public functions #####################
 
 #Usage: add  _acme-challenge.www.domain.com   "XKrxpRBosdIKFzxW_CT3KLZNf6q0HG9i01zxXp5CPBs"
-dns-cx-add() {
+dns_cx_add() {
   fulldomain=$1
   txtvalue=$2
   
@@ -44,13 +44,13 @@ dns-cx-add() {
     return 1
   fi
 
-  if [ "$count" == "0" ] ; then
+  if [ "$count" = "0" ] ; then
     add_record $_domain $_sub_domain $txtvalue
   else
     update_record $_domain $_sub_domain $txtvalue
   fi
   
-  if [ "$?" == "0" ] ; then
+  if [ "$?" = "0" ] ; then
     return 0
   fi
   return 1
@@ -69,7 +69,7 @@ existing_records() {
     return 1
   fi
   count=0
-  seg=$(printf "$response" | grep -o "{[^{]*host\":\"$_sub_domain[^}]*}")
+  seg=$(printf "%s\n" "$response" | _egrep_o "{[^{]*host\":\"$_sub_domain\"[^}]*}")
   _debug seg "$seg"
   if [ -z "$seg" ] ; then
     return 0
@@ -77,7 +77,7 @@ existing_records() {
 
   if printf "$response" | grep '"type":"TXT"' > /dev/null ; then
     count=1
-    record_id=$(printf "$seg" | grep -o \"record_id\":\"[^\"]*\" | cut -d : -f 2 | tr -d \")
+    record_id=$(printf "%s\n" "$seg" | _egrep_o \"record_id\":\"[^\"]*\" | cut -d : -f 2 | tr -d \")
     _debug record_id "$record_id"
     return 0    
   fi
@@ -144,10 +144,10 @@ _get_root() {
       return 1;
     fi
 
-    if printf "$response" | grep "$h." ; then
-      seg=$(printf "$response" | grep -o "{[^{]*$h\.[^}]*\}" )
+    if printf "$response" | grep "$h." >/dev/null ; then
+      seg=$(printf "%s" "$response" | _egrep_o "{[^{]*\"$h\.\"[^}]*\}" )
       _debug seg "$seg"
-      _domain_id=$(printf "$seg" | grep -o \"id\":\"[^\"]*\" | cut -d : -f 2 | tr -d \")
+      _domain_id=$(printf "%s" "$seg" | _egrep_o \"id\":\"[^\"]*\" | cut -d : -f 2 | tr -d \")
       _debug _domain_id "$_domain_id"
       if [ "$_domain_id" ] ; then
         _sub_domain=$(printf $domain | cut -d . -f 1-$p)
@@ -159,7 +159,7 @@ _get_root() {
       return 1
     fi
     p=$i
-    let "i+=1"
+    i=$(expr $i + 1)
   done
   return 1
 }
@@ -183,52 +183,27 @@ _rest() {
   _debug sec "$sec"
   hmac=$(printf "$sec"| openssl md5 |cut -d " " -f 2)
   _debug hmac "$hmac"
-    
-  if [ "$3" ] ; then
-    response="$(curl --silent -X $m "$url" -H "API-KEY: $CX_Key" -H "API-REQUEST-DATE: $cdate" -H "API-HMAC: $hmac" -H 'Content-Type: application/json'  -d "$data")"
+
+  _H1="API-KEY: $CX_Key"
+  _H2="API-REQUEST-DATE: $cdate"
+  _H3="API-HMAC: $hmac"
+  _H4="Content-Type: application/json"
+
+  if [ "$data" ] ; then
+    response="$(_post "$data" "$url" "" $m)"
   else
-    response="$(curl --silent -X $m "$url" -H "API-KEY: $CX_Key" -H "API-REQUEST-DATE: $cdate" -H "API-HMAC: $hmac" -H 'Content-Type: application/json')"
+    response="$(_get "$url")"
   fi
   
   if [ "$?" != "0" ] ; then
     _err "error $ep"
     return 1
   fi
-  _debug response "$response"
+  _debug2 response "$response"
   if ! printf "$response" | grep '"message":"success"' > /dev/null ; then
     return 1
   fi
   return 0
-}
-
-
-_debug() {
-
-  if [ -z "$DEBUG" ] ; then
-    return
-  fi
-  
-  if [ -z "$2" ] ; then
-    echo $1
-  else
-    echo "$1"="$2"
-  fi
-}
-
-_info() {
-  if [ -z "$2" ] ; then
-    echo "$1"
-  else
-    echo "$1"="$2"
-  fi
-}
-
-_err() {
-  if [ -z "$2" ] ; then
-    echo "$1" >&2
-  else
-    echo "$1"="$2" >&2
-  fi
 }
 
 
